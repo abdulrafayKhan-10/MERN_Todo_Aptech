@@ -70,8 +70,17 @@ const loginUser = async (req, res) => {
       if (!isMatch) {
           return res.status(401).json({ message: 'Invalid credentials' });
       }
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      res.json({ token });
+      
+      // Create payload with more user data
+      const payload = {
+          userId: user._id,
+          name: user.name,
+          email: user.email,
+          age: user.age
+      };
+      
+      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+      res.json({ token, user: payload }); // Optionally return user data alongside token
   } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
   }

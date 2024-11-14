@@ -1,21 +1,25 @@
-const { TodoTask } = require('../models/todotaskModel'); // Make sure to use the updated schema model
+const TodoTask = require('../models/todotaskModel');
 
-// Controller to create a new to-do task
 const createTask = async (req, res) => {
     try {
-        const { title } = req.body;
-        const newTask = new TodoTask({ title });
-        await newTask.save();
-        res.status(201).json({ message: "Task created successfully", task: newTask });
+      const { title, category, completed } = req.body;  // Extract category and completed from request body
+      const newTask = new TodoTask({ 
+        title,
+        category,
+        completed: completed || false  // Set default to false if not provided
+      });
+      await newTask.save();
+      res.status(201).json({ message: "Task created successfully", task: newTask });
     } catch (error) {
-        res.status(500).json({ message: "Error creating task", error: error.message });
+      res.status(500).json({ message: "Error creating task", error: error.message });
     }
 };
+  
 
 // Controller to get all to-do tasks
 const getTasks = async (req, res) => {
     try {
-        const tasks = await TodoTask.find();
+        const tasks = await TodoTask.find({});
         res.status(200).json(tasks);
     } catch (error) {
         res.status(500).json({ message: "Error fetching tasks", error: error.message });

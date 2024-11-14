@@ -21,8 +21,7 @@ const Login = ({ setIsAuthenticated }) => {
         try {
             const response = await loginUser(loginData);
             toast.success('Login successful!');
-            localStorage.setItem('token', response.data.token);
-            setIsAuthenticated(true); // Update authentication status
+            setIsAuthenticated(true);
             navigate('/');
         } catch (error) {
             if (error.response && error.response.status === 401) {

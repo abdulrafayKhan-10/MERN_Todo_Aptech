@@ -4,6 +4,7 @@ import Nav from './Components/Nav';
 import Home from './Pages/Home';
 import Login from './Pages/Login';
 import Register from './Pages/Register';
+import Profile from './Pages/Profile';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -20,6 +21,14 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     setIsAuthenticated(false);
+  };
+
+  // Protected Route wrapper component
+  const ProtectedRoute = ({ children }) => {
+    if (!isAuthenticated) {
+      return <Navigate to="/login" />;
+    }
+    return children;
   };
 
   return (
@@ -41,7 +50,17 @@ function App() {
             element={isAuthenticated ? <Navigate to="/" /> : <Register />}
           />
 
-          {/* Catch-all route: redirect to home if route not found */}
+          {/* Protected Routes */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

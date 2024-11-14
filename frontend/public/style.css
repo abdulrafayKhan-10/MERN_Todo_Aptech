@@ -1,0 +1,19 @@
+.nav-link:hover {
+    color: #3498db !important;
+    transition: color 0.2s ease;
+}
+
+.navbar-nav .nav-link {
+    padding: 0.5rem 1rem;
+    margin: 0 0.2rem;
+    border-radius: 4px;
+}
+
+.navbar-toggler {
+    border: 1px solid #ecf0f1;
+    padding: 0.5rem;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+}
