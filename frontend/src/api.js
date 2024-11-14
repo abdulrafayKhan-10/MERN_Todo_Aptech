@@ -42,29 +42,27 @@ export const getTodos = async (token) => {
     }
 };
 
-export const addTodo = async (todoData, token) => {
+export const addTodo = async (todoData) => {
     try {
-      const response = await axios.post(
-        `${API_URL}/todo`,  // Make sure this is the correct endpoint
-        todoData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      return response.data;  // Make sure your backend sends the task object back
+        const response = await axios.post(
+            `${API_URL}/todo`,
+            todoData,
+            {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            }
+        );
+        return response.data;
     } catch (error) {
-      console.error('Error adding todo:', error);
-      throw error;  // This ensures you can catch errors in the Home component
+        console.error('Error adding todo:', error);
+        throw error;
     }
-  };
-  
-export const updateTodo = async (id, updatedData, token) => {
+};
+
+export const updateTodo = async (id, updateData) => {
     try {
-        const response = await axios.put(`${API_URL}/todo/${id}`, updatedData, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.put(`${API_URL}/todo/${id}`, updateData);
         return response.data;
     } catch (error) {
         console.error('Error updating todo:', error);
@@ -72,14 +70,22 @@ export const updateTodo = async (id, updatedData, token) => {
     }
 };
 
-export const deleteTodo = async (id, token) => {
+export const deleteTodo = async (id) => {
     try {
-        const response = await axios.delete(`${API_URL}/todo/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.delete(`${API_URL}/todo/${id}`);
         return response.data;
     } catch (error) {
         console.error('Error deleting todo:', error);
+        throw error;
+    }
+};
+
+export const fetchTodos = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/todo`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching todos:', error);
         throw error;
     }
 };

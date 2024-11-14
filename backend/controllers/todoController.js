@@ -1,59 +1,56 @@
 const TodoTask = require('../models/todotaskModel');
 
+// Create a new task
 const createTask = async (req, res) => {
     try {
-      const { title, category, completed } = req.body;  // Extract category and completed from request body
-      const newTask = new TodoTask({ 
-        title,
-        category,
-        completed: completed || false  // Set default to false if not provided
-      });
-      await newTask.save();
-      res.status(201).json({ message: "Task created successfully", task: newTask });
+        const { title, category, completed } = req.body;
+        const newTask = new TodoTask({
+            title,
+            category,
+            completed: completed || false
+        });
+        const savedTask = await newTask.save();
+        res.status(201).json(savedTask);
     } catch (error) {
-      res.status(500).json({ message: "Error creating task", error: error.message });
+        res.status(500).json({ message: "Error creating task", error: error.message });
     }
 };
-  
 
-// Controller to get all to-do tasks
+// Get all tasks
 const getTasks = async (req, res) => {
     try {
-        const tasks = await TodoTask.find({});
+        const tasks = await TodoTask.find();
         res.status(200).json(tasks);
     } catch (error) {
         res.status(500).json({ message: "Error fetching tasks", error: error.message });
     }
 };
 
-// Controller to update a to-do task by ID
+// Update a task
 const updateTask = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { title, completed } = req.body;
-        const updatedTask = await TodoTask.findByIdAndUpdate(
-            id,
-            { title, completed },
-            { new: true, runValidators: true }
+        const task = await TodoTask.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
         );
-        if (!updatedTask) {
+        if (!task) {
             return res.status(404).json({ message: "Task not found" });
         }
-        res.status(200).json({ message: "Task updated successfully", task: updatedTask });
+        res.json(task);
     } catch (error) {
         res.status(500).json({ message: "Error updating task", error: error.message });
     }
 };
 
-// Controller to delete a to-do task by ID
+// Delete a task
 const deleteTask = async (req, res) => {
     try {
-        const { id } = req.params;
-        const deletedTask = await TodoTask.findByIdAndDelete(id);
-        if (!deletedTask) {
+        const task = await TodoTask.findByIdAndDelete(req.params.id);
+        if (!task) {
             return res.status(404).json({ message: "Task not found" });
         }
-        res.status(200).json({ message: "Task deleted successfully" });
+        res.json({ message: "Task deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: "Error deleting task", error: error.message });
     }

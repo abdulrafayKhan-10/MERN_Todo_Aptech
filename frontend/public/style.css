@@ -1,19 +1,79 @@
-.nav-link:hover {
-    color: #3498db !important;
-    transition: color 0.2s ease;
+/* Add to your CSS file */
+.btn-outline-light:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    transform: translateY(-1px);
 }
 
-.navbar-nav .nav-link {
-    padding: 0.5rem 1rem;
-    margin: 0 0.2rem;
-    border-radius: 4px;
+.btn:not(.btn-outline-light):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.navbar-toggler {
-    border: 1px solid #ecf0f1;
-    padding: 0.5rem;
+.navbar-brand:hover {
+    transform: scale(1.05);
 }
 
-.navbar-toggler:focus {
-    box-shadow: none;
+.nav-link {
+    position: relative;
+}
+
+.nav-link:not(.btn):after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background-color: #ffffff;
+    transition: all 0.3s;
+}
+
+.nav-link:not(.btn):hover:after {
+    width: 100%;
+    left: 0;
+}
+
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+body {
+  background-color: #f8f9fa;
+  font-family: 'Poppins', sans-serif;
+}
+
+.modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+  border-bottom: 2px solid #f0f0f0;
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  border-top: 2px solid #f0f0f0;
+  padding: 1.5rem;
+}
+
+.btn-close:focus {
+  box-shadow: none;
+}
+
+.form-check-input:checked {
+  background-color: #2ed573;
+  border-color: #2ed573;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.info-item:hover {
+    background-color: #ffffff !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
 }

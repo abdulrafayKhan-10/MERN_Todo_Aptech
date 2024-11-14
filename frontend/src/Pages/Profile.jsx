@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
+import { FaUser, FaEnvelope, FaBirthdayCake } from 'react-icons/fa';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -27,23 +28,60 @@ const Profile = () => {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold mb-4">Profile</h1>
-        <div className="space-y-4">
-          <div>
-            <label className="font-semibold">Name:</label>
-            <p>{user.name}</p>
+    <div className="container mt-5">
+      <div className="row justify-content-center">
+        <div className="col-md-8 col-lg-6">
+          <div className="card shadow-lg border-0 rounded-lg">
+            <div className="card-body p-5">
+              <h1 className="text-center mb-5" style={{ color: '#2c3e50', fontWeight: '600' }}>
+                My Profile
+              </h1>
+              
+              <div className="profile-info">
+                <div className="info-item mb-4 p-4" style={{ 
+                  backgroundColor: '#f8f9fa', 
+                  borderRadius: '10px',
+                  transition: 'all 0.3s'
+                }}>
+                  <div className="d-flex align-items-center mb-2">
+                    <FaUser className="text-muted me-2" />
+                    <label className="text-muted mb-0">Name</label>
+                  </div>
+                  <p className="mb-0" style={{ fontSize: '1.1rem', color: '#2c3e50' }}>
+                    {user.name}
+                  </p>
+                </div>
+
+                <div className="info-item mb-4 p-4" style={{ 
+                  backgroundColor: '#f8f9fa', 
+                  borderRadius: '10px',
+                  transition: 'all 0.3s'
+                }}>
+                  <div className="d-flex align-items-center mb-2">
+                    <FaEnvelope className="text-muted me-2" />
+                    <label className="text-muted mb-0">Email</label>
+                  </div>
+                  <p className="mb-0" style={{ fontSize: '1.1rem', color: '#2c3e50' }}>
+                    {user.email}
+                  </p>
+                </div>
+
+                <div className="info-item mb-4 p-4" style={{ 
+                  backgroundColor: '#f8f9fa', 
+                  borderRadius: '10px',
+                  transition: 'all 0.3s'
+                }}>
+                  <div className="d-flex align-items-center mb-2">
+                    <FaBirthdayCake className="text-muted me-2" />
+                    <label className="text-muted mb-0">Age</label>
+                  </div>
+                  <p className="mb-0" style={{ fontSize: '1.1rem', color: '#2c3e50' }}>
+                    {user.age}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="font-semibold">Email:</label>
-            <p>{user.email}</p>
-          </div>
-          <div>
-            <label className="font-semibold">Age:</label>
-            <p>{user.age}</p>
-          </div>
-          {/* Add more user fields as needed */}
         </div>
       </div>
     </div>

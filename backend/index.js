@@ -4,11 +4,9 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
 const userController = require("./controllers/userController");
-const todoController = require("./controllers/todoController"); // Import the todo controller
+const todoController = require("./controllers/todoController");
 const connectDB = require("./config/db");
 connectDB();
-
-app.use(cors());
 
 const corsOptions = {
     origin: 'http://localhost:3000',
@@ -26,14 +24,14 @@ app.route("/api/user/login").post(userController.loginUser);
 app.route("/api/user/register").post(userController.registerUser);
 app.route("/api/user/:id").post(userController.updateUser);
 
-// Todo Routes
+// Todo Routes (no authentication required)
 app.route("/api/todo")
-    .get(todoController.getTasks)  // Get all tasks
-    .post(todoController.createTask); // Create a new task
+    .get(todoController.getTasks)
+    .post(todoController.createTask);
 
 app.route("/api/todo/:id")
-    .put(todoController.updateTask)   // Update a task
-    .delete(todoController.deleteTask); // Delete a task
+    .put(todoController.updateTask)
+    .delete(todoController.deleteTask);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);
