@@ -1,12 +1,64 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { createTodo, modifyTodo, removeTodo, retrieveTodos } from '../api'; // Modified API function names
+import axios from 'axios';
 
+
+//yeh functions todo ke CRUD operations ke liye hai
+const createTodo = async (todoData) => {
+  try {
+      const response = await axios.post(
+          `http://localhost:5000/api/todo`,
+          todoData,
+          {
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+          }
+      );
+      return response.data;
+  } catch (error) {
+      console.error('Error adding todo:', error);
+      throw error;
+  }
+};
+
+const modifyTodo = async (id, updateData) => {
+  try {
+      const response = await axios.put(`http://localhost:5000/api/todo/${id}`, updateData);
+      return response.data;
+  } catch (error) {
+      console.error('Error updating todo:', error);
+      throw error;
+  }
+};
+
+const removeTodo = async (id) => {
+  try {
+      const response = await axios.delete(`http://localhost:5000/api/todo/${id}`);
+      return response.data;
+  } catch (error) {
+      console.error('Error deleting todo:', error);
+      throw error;
+  }
+};
+
+
+const retrieveTodos = async () => {
+  try {
+      const response = await axios.get(`http://localhost:5000/api/todo`);
+      return response.data;
+  } catch (error) {
+      console.error('Error fetching todos:', error);
+      throw error;
+  }
+};
+
+
+
+//yeh Home page hai
 const Home = ({ isAuthenticated, token }) => {
   const [taskList, setTaskList] = useState([]);
   const [currentTask, setCurrentTask] = useState('');
-  const [editingMode, setEditingMode] = useState(false);
   const [taskIndexToEdit, setTaskIndexToEdit] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [editDialogVisible, setEditDialogVisible] = useState(false);
@@ -66,28 +118,42 @@ const Home = ({ isAuthenticated, token }) => {
 
   const confirmDeleteTask = async () => {
     try {
-      await removeTodo(taskList[taskIndexToEdit]._id, token);
-      setTaskList((prevTasks) => prevTasks.filter((_, index) => index !== taskIndexToEdit));
+      const taskToDelete = taskList[taskIndexToEdit];
+      if (!taskToDelete) return;
+      
+      await removeTodo(taskToDelete._id, token);
+      await loadTasks(); // Reload the full task list instead of manual filtering
       setDeleteDialogVisible(false);
+      setTaskIndexToEdit(null);
     } catch (error) {
       console.error('Error deleting task:', error);
     }
   };
 
   const initiateEditTask = (index) => {
-    setCurrentTask(taskList[index].title);
+    const taskToEdit = taskList[index];
+    if (!taskToEdit) return;
+    
+    setCurrentTask(taskToEdit.title);
+    setTaskCategory(taskToEdit.category);
     setTaskIndexToEdit(index);
     setEditDialogVisible(true);
   };
 
   const saveTaskChanges = async () => {
     try {
-      await modifyTodo(taskList[taskIndexToEdit]._id, { title: currentTask }, token);
-      setTaskList((prevTasks) =>
-        prevTasks.map((task, index) =>
-          index === taskIndexToEdit ? { ...task, title: currentTask } : task
-        )
+      const taskToEdit = taskList[taskIndexToEdit];
+      if (!taskToEdit) return;
+
+      await modifyTodo(
+        taskToEdit._id, 
+        { 
+          title: currentTask,
+          category: taskCategory 
+        }, 
+        token
       );
+      await loadTasks(); // Reload the full task list
       setEditDialogVisible(false);
       setCurrentTask('');
       setTaskIndexToEdit(null);
@@ -234,7 +300,7 @@ const Home = ({ isAuthenticated, token }) => {
                   <div key={category.id} className="mb-4">
                     <h5 style={styles.categoryTitle}>{category.label}</h5>
                     <ul className="list-group">
-                      {tasksInCategory.map((task) => (
+                      {tasksInCategory.map((task, index) => (
                         <li
                           key={task._id}
                           className="list-group-item d-flex justify-content-between align-items-center"
@@ -274,6 +340,66 @@ const Home = ({ isAuthenticated, token }) => {
               })}
             </div>
           )}
+        </div>
+      )}
+      {deleteDialogVisible && (
+        <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm Delete</h5>
+                <button type="button" className="btn-close" onClick={() => setDeleteDialogVisible(false)}></button>
+              </div>
+              <div className="modal-body">
+                Are you sure you want to delete this task?
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setDeleteDialogVisible(false)}>Cancel</button>
+                <button type="button" className="btn btn-danger" onClick={confirmDeleteTask}>Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {editDialogVisible && (
+        <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Edit Task</h5>
+                <button type="button" className="btn-close" onClick={() => {
+                  setEditDialogVisible(false);
+                  setCurrentTask('');
+                }}></button>
+              </div>
+              <div className="modal-body">
+                <select
+                  className="form-select mb-3"
+                  value={taskCategory}
+                  onChange={(e) => setTaskCategory(e.target.value)}
+                >
+                  {availableCategories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={currentTask}
+                  onChange={(e) => setCurrentTask(e.target.value)}
+                />
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => {
+                  setEditDialogVisible(false);
+                  setCurrentTask('');
+                }}>Cancel</button>
+                <button type="button" className="btn btn-primary" onClick={saveTaskChanges}>Save Changes</button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { createUser } from '../api';  // Add getRoles to your API functions
 import { toast } from 'react-toastify';
+import axios from 'axios';
+
+const registerUser = async (userData) => {
+    try {
+        const response = await axios.post(`http://localhost:5000/api/user/register`, userData);
+        return response;
+    } catch (error) {
+        console.error('Error registering user:', error);
+        throw error;
+    }
+};
+
 
 const Register = () => {
     const [userData, setUserData] = useState({
@@ -26,7 +37,7 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await createUser(userData);
+            await registerUser(userData);
             toast.success("User registered successfully!");
             setUserData({ name: '', email: '',age: '', password: ''});
         } catch (error) {

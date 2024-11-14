@@ -1,7 +1,24 @@
 import React, { useState } from 'react';
-import { loginUser } from '../api';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+
+
+const loginUser = async (loginData) => {
+    try {
+        const response = await axios.post(`http://localhost:5000/api/user/login`, loginData);
+        if (response.data.token) {
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('userData', JSON.stringify(response.data.user));
+        }
+        return response;
+    } catch (error) {
+        console.error('Error logging in:', error);
+        throw error;
+    }
+};
+
 
 const Login = ({ setIsAuthenticated }) => {
     const [loginData, setLoginData] = useState({
