@@ -1,55 +1,65 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
-const registerUser = async (userData) => {
-    try {
-        const response = await axios.post(`http://localhost:5000/api/user/register`, userData);
-        return response;
-    } catch (error) {
-        console.error('Error registering user:', error);
-        throw error;
+function registerNewUser(userInfo) {
+    return axios.post('http://localhost:5000/api/user/register', userInfo);
+}
+
+function Register() {
+    const navigate = useNavigate();
+    
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [age, setAge] = useState('');
+    const [password, setPassword] = useState('');
+    const [isRegistering, setIsRegistering] = useState(false);
+
+    function handleNameChange(e) {
+        setName(e.target.value);
     }
-};
 
+    function handleEmailChange(e) {
+        setEmail(e.target.value);
+    }
 
-const Register = () => {
-    const [userData, setUserData] = useState({
-        name: '',
-        email: '',
-        age: '',
-        password: '',
-    });
+    function handleAgeChange(e) {
+        setAge(e.target.value);
+    }
 
-    const [loading, setLoading] = useState(true);  // Loading state for roles
+    function handlePasswordChange(e) {
+        setPassword(e.target.value);
+    }
 
-    useEffect(() => {
-      
-        setLoading(false);
-      
-    }, []);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setUserData({ ...userData, [name]: value });
-    };
-
-    const handleSubmit = async (e) => {
+    async function handleFormSubmit(e) {
         e.preventDefault();
-        try {
-            await registerUser(userData);
-            toast.success("User registered successfully!");
-            setUserData({ name: '', email: '',age: '', password: ''});
-        } catch (error) {
-            if (error.code === 11000) { // 11000 is the error code for duplicate key
-                return error.code(409).toast.error({ message: 'User already exists' });
-              } else {
-                toast.error('Failed to register user');
-            }
-            console.error(error);
-        }
-    };
+        setIsRegistering(true);
 
+        try {
+            let userInfo = {
+                name: name,
+                email: email,
+                age: age,
+                password: password
+            };
+
+            await registerNewUser(userInfo);
+            toast.success("Yay! Registration successful!");
+            
+            setName('');
+            setEmail('');
+            setAge('');
+            setPassword('');
+            
+            navigate('/login');
+        } catch (error) {
+            toast.error("Oops! Registration failed. Please try again.");
+            console.log("Registration error:", error);
+        }
+
+        setIsRegistering(false);
+    }
 
     return (
         <div className="container mt-5">
@@ -60,50 +70,49 @@ const Register = () => {
                             <h2 className="text-center mb-4" style={{ color: '#2c3e50', fontWeight: '600' }}>
                                 Create Account
                             </h2>
-                            <form onSubmit={handleSubmit} className="mt-4">
+                            <form onSubmit={handleFormSubmit} className="mt-4">
                                 <div className="form-group mb-4">
-                                    <label htmlFor="name" className="form-label text-muted mb-2">Full Name</label>
+                                    <label className="form-label text-muted mb-2">Full Name</label>
                                     <input
                                         type="text"
-                                        name="name"
-                                        value={userData.name}
-                                        onChange={handleChange}
+                                        value={name}
+                                        onChange={handleNameChange}
                                         className="form-control form-control-lg"
                                         style={{ backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}
                                         required
                                     />
                                 </div>
+
                                 <div className="form-group mb-4">
-                                    <label htmlFor="email" className="form-label text-muted mb-2">Email Address</label>
+                                    <label className="form-label text-muted mb-2">Email Address</label>
                                     <input
                                         type="email"
-                                        name="email"
-                                        value={userData.email}
-                                        onChange={handleChange}
+                                        value={email}
+                                        onChange={handleEmailChange}
                                         className="form-control form-control-lg"
                                         style={{ backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}
                                         required
                                     />
                                 </div>
+
                                 <div className="form-group mb-4">
-                                    <label htmlFor="age" className="form-label text-muted mb-2">Age</label>
+                                    <label className="form-label text-muted mb-2">Age</label>
                                     <input
                                         type="number"
-                                        name="age"
-                                        value={userData.age}
-                                        onChange={handleChange}
+                                        value={age}
+                                        onChange={handleAgeChange}
                                         className="form-control form-control-lg"
                                         style={{ backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}
                                         required
                                     />
                                 </div>
+
                                 <div className="form-group mb-4">
-                                    <label htmlFor="password" className="form-label text-muted mb-2">Password</label>
+                                    <label className="form-label text-muted mb-2">Password</label>
                                     <input
                                         type="password"
-                                        name="password"
-                                        value={userData.password}
-                                        onChange={handleChange}
+                                        value={password}
+                                        onChange={handlePasswordChange}
                                         className="form-control form-control-lg"
                                         style={{ backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}
                                         required
@@ -120,10 +129,14 @@ const Register = () => {
                                         fontWeight: '500',
                                         transition: 'all 0.3s'
                                     }}
-                                    disabled={loading}
+                                    disabled={isRegistering}
                                 >
-                                    Register
+                                    {isRegistering ? 'Creating Account...' : 'Register'}
                                 </button>
+
+                                <p className="text-center mt-4">
+                                    Already have an account? <a href="/login" style={{ color: '#3498db' }}>Login here</a>
+                                </p>
                             </form>
                         </div>
                     </div>
@@ -131,6 +144,6 @@ const Register = () => {
             </div>
         </div>
     );
-};
+}
 
 export default Register;

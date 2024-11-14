@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Nav from './Nav';
-import Home from './Pages/Home';
-import Login from './Pages/Login';
-import Register from './Pages/Register';
-import Profile from './Pages/Profile';
+import Home from './Views/Home';
+import Login from './Views/Login';
+import Register from './Views/Register';
+import Profile from './Views/Profile';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

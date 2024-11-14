@@ -1,95 +1,116 @@
-const User = require('../models/userModel');
+const User = require('../models/alluserModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const registerUser = async (req, res) => {
-  try {
-    const { name, email, age, password } = req.body;
 
-    // Log incoming data
-    console.log('Incoming data:', req.body);
+function registerUser(req, res) {
+    const name = req.body.name;
+    const email = req.body.email;
+    const age = req.body.age;
+    const password = req.body.password;
 
-    // Check if email already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: 'User already exists' });
-    }
+    User.findOne({ email: email })
+        .then(foundUser => {
+            if (foundUser) {
+                return res.status(409).json({ 
+                    message: 'Sorry, this email is already registered!' 
+                });
+            }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+            bcrypt.hash(password, 10)
+                .then(hashedPassword => {
+                    let newUser = new User({
+                        name: name,
+                        email: email,
+                        age: age,
+                        password: hashedPassword
+                    });
 
-    // Create and save the new user
-    const user = new User({ name, email,age, password: hashedPassword,});
-    await user.save();
+                    newUser.save()
+                        .then(savedUser => {
+                            res.status(201).json({ 
+                                message: 'Welcome! Your account has been created',
+                                user: savedUser 
+                            });
+                        })
+                        .catch(err => {
+                            res.status(500).json({ 
+                                message: 'Something went wrong while saving user',
+                                error: err.message 
+                            });
+                        });
+                })
+                .catch(err => {
+                    res.status(500).json({ 
+                        message: 'Password encryption failed',
+                        error: err.message 
+                    });
+                });
+        })
+        .catch(err => {
+            res.status(500).json({ 
+                message: 'Error checking existing user',
+                error: err.message 
+            });
+        });
+}
 
-    res.status(201).json({ message: 'User created successfully', user });
-  } catch (error) {
-    console.error('Error creating user:', error);
+function loginUser(req, res) {
+    const email = req.body.email;
+    const password = req.body.password;
 
-    // Check if it's a validation error
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ message: 'Validation error', error: error.message });
-    }
+    User.findOne({ email: email })
+        .then(foundUser => {
+            if (!foundUser) {
+                return res.status(401).json({ 
+                    message: 'No account found with this email' 
+                });
+            }
 
-    res.status(500).json({ message: 'Error creating user', error: error.message });
-  }
-};
+            bcrypt.compare(password, foundUser.password)
+                .then(passwordMatch => {
+                    if (!passwordMatch) {
+                        return res.status(401).json({ 
+                            message: 'Wrong password, please try again' 
+                        });
+                    }
 
-// Update a user by ID
-const updateUser = async (req, res) => {
-  try {
-    const {name, email, age, password } = req.body;
-    let updatedData = { name, email, age };
+                    let userData = {
+                        userId: foundUser._id,
+                        name: foundUser.name,
+                        email: foundUser.email,
+                        age: foundUser.age
+                    };
 
-    // Only hash the password if it's provided in the update
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      updatedData.password = hashedPassword;
-    }
+                    let token = jwt.sign(
+                        userData, 
+                        process.env.JWT_SECRET, 
+                        { expiresIn: '1h' }
+                    );
 
-    const user = await User.findByIdAndUpdate(req.params.id, updatedData, {
-      new: true,
-      runValidators: true,
-    });
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.status(200).json({ message: 'User updated successfully', user });
-  } catch (error) {
-    res.status(400).json({ message: 'Error updating user', error: error.message });
-  }
-};
-
-
-
-const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-  try {
-      const user = await User.findOne({ email });
-      if (!user) {
-          return res.status(401).json({ message: 'Invalid credentials' });
-      }
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-          return res.status(401).json({ message: 'Invalid credentials' });
-      }
-      
-      // Create payload with more user data
-      const payload = {
-          userId: user._id,
-          name: user.name,
-          email: user.email,
-          age: user.age
-      };
-      
-      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
-      res.json({ token, user: payload }); // Optionally return user data alongside token
-  } catch (error) {
-      res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
+                    res.json({ 
+                        message: 'Login successful!',
+                        token: token, 
+                        user: userData 
+                    });
+                })
+                .catch(err => {
+                    res.status(500).json({ 
+                        message: 'Error checking password',
+                        error: err.message 
+                    });
+                });
+        })
+        .catch(err => {
+            res.status(500).json({ 
+                message: 'Error finding user',
+                error: err.message 
+            });
+        });
+}
 
 module.exports = {
-  registerUser,
-  updateUser,
-  loginUser
+    registerUser,
+    loginUser
 };
 
 

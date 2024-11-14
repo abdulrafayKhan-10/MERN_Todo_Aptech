@@ -82,10 +82,18 @@ const Home = ({ isAuthenticated, token }) => {
   const loadTasks = async () => {
     try {
       setIsLoading(true);
-      const tasks = await retrieveTodos(token);
-      setTaskList(tasks);
+      const response = await retrieveTodos(token);
+      const tasks = response.tasks || response;
+      
+      if (Array.isArray(tasks)) {
+        setTaskList(tasks);
+      } else {
+        console.error('Received invalid task data:', tasks);
+        setTaskList([]);
+      }
     } catch (error) {
       console.error('Failed to load tasks:', error);
+      setTaskList([]);
     } finally {
       setIsLoading(false);
     }
@@ -247,7 +255,7 @@ const Home = ({ isAuthenticated, token }) => {
             />
             <h2 style={styles.authTitle}>Welcome to Your Task Manager</h2>
             <p style={styles.authText}>
-              Organize your life and achieve your goals efficiently with our intuitive task manager. Log in or sign up to get started!
+            Take control of your life and reach your goals effortlessly with our easy-to-use task manager. Sign up or log in to get started today!
             </p>
             <div className="d-flex justify-content-center align-items-center">
               <a href="/login" className="btn btn-primary" style={styles.buttonStyle}>Login</a>
